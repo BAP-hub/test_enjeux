@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Enjeux environnementaux UBS</title>
+
+<link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+<>
+body{
+    font-family: Arial, sans-serif;
+    margin:30px;
+    background:#f5f5f5;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,.15);
+}
+
+.error{
+    color:red;
+}
+
+.success{
+    color:green;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Enjeux environnementaux UBS</h1>
+
+<div id="result" class="card">
+Connexion ArcGIS Online...
+</div>
+
+<script>
+
+window.onerror = function(message, source, lineno){
+    document.getElementById("result").innerHTML =
+        "<h3 class='error'>Erreur JavaScript</h3>" +
+        "<b>Message :</b> " + message +
+        "<br><b>Ligne :</b> " + lineno;
+};
+
+require([
+    "esri/identity/OAuthInfo",
+    "esri/identity/IdentityManager"
+], function(OAuthInfo, esriId){
+
+    const info = new OAuthInfo({
+        appId: "VOTRE_CLIENT_ID",
+        portalUrl: "https://www.arcgis.com",
+        popup: true
+    });
+
+    esriId.registerOAuthInfos([info]);
+
+    esriId.getCredential(info.portalUrl + "/sharing")
+        .then(function(){
+
+            document.getElementById("result").innerHTML =
+                "<span class='success'>✅ Utilisateur authentifié</span><br><br>";
+
+            main();
+
+        })
+        .catch(function(error){
+
+            document.getElementById("result").innerHTML =
+                "<span class='error'>Accès refusé</span><br>" +
+                error;
+
+        });
+
+});
+
+async function main(){
+
+    const output = document.getElementById("result");
+
+    const params = new URLSearchParams(
+        window.location.search
+    );
+
+    const objectid = params.get("id");
+
+    if(!objectid){
+
+        output.innerHTML =
+            "<span class='error'>OBJECTID manquant dans l'URL</span>" +
+            "<br><br>Exemple : index.html?id=1";
+
+        return;
+    }
+
+    output.innerHTML =
+        "Chargement des données...";
+
+    try{
+
+        const url =
+            "https://services-eu1.arcgis.com/Kxsn3iT6KEQ7OlSW/arcgis/rest/services/UBS_Sites_Prospection_FR/FeatureServer/1/query" +
+            "?where=OBJECTID=" + objectid +
+            "&outFields=*" +
+            "&returnGeometry=true" +
+            "&f=geojson";
+
+        const response = await fetch(url);
+
+        const data = await response.json();
+
+        if(
+            !data.features ||
+            data.features.length === 0
+        ){
+            output.innerHTML =
+                "<span class='error'>Aucune entité trouvée</span>";
+            return;
+        }
+
+        const feature = data.features[0];
+
+        output.innerHTML =
+            "<div class='success'>✅ Entité trouvée</div>" +
+            "<br><b>OBJECTID :</b> " + objectid +
+            "<br><br><b>Type géométrique :</b> " +
+            feature.geometry.type +
+            "<br><br><b>Attributs :</b><pre>" +
+            JSON.stringify(
+                feature.properties,
+                null,
+                2
+            ) +
+            "</pre>";
+
+    }
+    catch(error){
+
+        output.innerHTML =
+            "<span class='error'>Erreur d'accès aux données</span><br>" +
+            error;
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
