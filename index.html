@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Enjeux environnementaux UBS</title>
+    <meta charset="UTF-8">
+    <title>Enjeux environnementaux UBS</title>
 
-<link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
-<>
-body{
-    font-family: Arial, sans-serif;
-    margin:30px;
-    background:#f5f5f5;
-}
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+    ://js.arcgis.com/4.30/"></script>
 
-.card{
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 5px rgba(0,0,0,.15);
-}
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            margin:30px;
+            background:#f5f5f5;
+        }
 
-.error{
-    color:red;
-}
+        .card{
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 2px 5px rgba(0,0,0,.15);
+            margin-bottom:15px;
+        }
 
-.success{
-    color:green;
-}
-</style>
+        .error{
+            color:red;
+        }
+
+        .success{
+            color:green;
+        }
+    </style>
 </head>
 
 <body>
@@ -34,7 +37,7 @@ body{
 <h1>Enjeux environnementaux UBS</h1>
 
 <div id="result" class="card">
-Connexion ArcGIS Online...
+    Connexion ArcGIS Online...
 </div>
 
 <script>
@@ -52,7 +55,7 @@ require([
 ], function(OAuthInfo, esriId){
 
     const info = new OAuthInfo({
-        appId: "VOTRE_CLIENT_ID",
+        appId: "yh0uBe36MXyPzk1q",
         portalUrl: "https://www.arcgis.com",
         popup: true
     });
@@ -61,19 +64,15 @@ require([
 
     esriId.getCredential(info.portalUrl + "/sharing")
         .then(function(){
-
             document.getElementById("result").innerHTML =
-                "<span class='success'>✅ Utilisateur authentifié</span><br><br>";
+                "<div class='success'>✅ Authentification ArcGIS Online réussie</div>";
 
             main();
-
         })
         .catch(function(error){
-
             document.getElementById("result").innerHTML =
-                "<span class='error'>Accès refusé</span><br>" +
+                "<div class='error'>❌ Authentification refusée</div><br>" +
                 error;
-
         });
 
 });
@@ -82,9 +81,7 @@ async function main(){
 
     const output = document.getElementById("result");
 
-    const params = new URLSearchParams(
-        window.location.search
-    );
+    const params = new URLSearchParams(window.location.search);
 
     const objectid = params.get("id");
 
@@ -92,13 +89,15 @@ async function main(){
 
         output.innerHTML =
             "<span class='error'>OBJECTID manquant dans l'URL</span>" +
-            "<br><br>Exemple : index.html?id=1";
+            "<br><br>Exemple :<br>?id=1";
 
         return;
     }
 
     output.innerHTML =
-        "Chargement des données...";
+        "OBJECTID détecté : " +
+        objectid +
+        "<br>Chargement de la couche UBS...";
 
     try{
 
@@ -110,15 +109,13 @@ async function main(){
             "&f=geojson";
 
         const response = await fetch(url);
-
         const data = await response.json();
 
-        if(
-            !data.features ||
-            data.features.length === 0
-        ){
+        if(!data.features || data.features.length === 0){
+
             output.innerHTML =
-                "<span class='error'>Aucune entité trouvée</span>";
+                "<span class='error'>Aucune entité trouvée ou accès refusé</span>";
+
             return;
         }
 
@@ -141,11 +138,10 @@ async function main(){
     catch(error){
 
         output.innerHTML =
-            "<span class='error'>Erreur d'accès aux données</span><br>" +
+            "<span class='error'>Erreur d'accès aux données</span><br><br>" +
             error;
 
     }
-
 }
 
 </script>
