@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <title>Enjeux environnementaux UBS</title>
 
+    <!-- Feuille de style ArcGIS -->
     <link rel="stylesheet"
           href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
-          
-    30/"></script>
+
+    <!-gis.com/4.30/"></script>
 
     <style>
         body{
@@ -33,7 +34,7 @@
         }
     </style>
 </head>
-    
+
 <body>
 
 <h1>Enjeux environnementaux UBS</h1>
@@ -66,17 +67,18 @@ require([
 
     esriId.getCredential(info.portalUrl + "/sharing")
         .then(function(){
+
             document.getElementById("result").innerHTML =
                 "<div class='success'>✅ Authentification ArcGIS Online réussie</div>";
 
             main();
         })
         .catch(function(error){
+
             document.getElementById("result").innerHTML =
                 "<div class='error'>❌ Authentification refusée</div><br>" +
                 error;
         });
-
 });
 
 async function main(){
@@ -84,14 +86,13 @@ async function main(){
     const output = document.getElementById("result");
 
     const params = new URLSearchParams(window.location.search);
-
     const objectid = params.get("id");
 
     if(!objectid){
 
         output.innerHTML =
             "<span class='error'>OBJECTID manquant dans l'URL</span>" +
-            "<br><br>Exemple :<br>?id=1";
+            "<br><br>Exemple : ?id=1";
 
         return;
     }
@@ -111,6 +112,7 @@ async function main(){
             "&f=geojson";
 
         const response = await fetch(url);
+
         const data = await response.json();
 
         if(!data.features || data.features.length === 0){
@@ -126,14 +128,9 @@ async function main(){
         output.innerHTML =
             "<div class='success'>✅ Entité trouvée</div>" +
             "<br><b>OBJECTID :</b> " + objectid +
-            "<br><br><b>Type géométrique :</b> " +
-            feature.geometry.type +
+            "<br><br><b>Type géométrique :</b> " + feature.geometry.type +
             "<br><br><b>Attributs :</b><pre>" +
-            JSON.stringify(
-                feature.properties,
-                null,
-                2
-            ) +
+            JSON.stringify(feature.properties, null, 2) +
             "</pre>";
 
     }
@@ -142,7 +139,6 @@ async function main(){
         output.innerHTML =
             "<span class='error'>Erreur d'accès aux données</span><br><br>" +
             error;
-
     }
 }
 
